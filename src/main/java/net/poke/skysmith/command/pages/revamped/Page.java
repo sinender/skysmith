@@ -105,7 +105,7 @@ public class Page {
         }
 
         this.item = Item.currentlyEditing.get(member.getId());
-        embedBuilder.setImage(item.build(member.getGuild(), member));
+        embedBuilder.setImage(item.build(member.getGuild().getId(), member.getId()));
 
         ArrayList<ItemComponent> components = new ArrayList<>();
         for (int i = 0; i < size; i++) {

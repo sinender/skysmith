@@ -1,10 +1,5 @@
 package net.poke.skysmith.utils;
 
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.sun.javafx.iio.gif.GIFImageLoaderFactory;
 import com.uploadcare.upload.FileUploader;
 import com.uploadcare.upload.UploadFailureException;
 import com.uploadcare.upload.Uploader;
@@ -22,21 +17,19 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static net.poke.skysmith.Main.s3;
-
 public class Item {
     public static HashMap<String, ArrayList<Item>> memberItems = new HashMap<>();
     public static HashMap<String, Item> currentlyEditing = new HashMap<>();
     public static HashMap<String, String> KEYS = new HashMap<>();
     public String name;
     public String id;
-    public ArrayList<String> description;
+    public List<String> description;
     public String rarity;
     public List<String> lore;
     public HashMap<Stat, Integer> stats;
     private int format = 0;
 
-    public Item(String id, String name, ArrayList<String> description, String rarity) {
+    public Item(String id, String name, List<String> description, String rarity) {
         this.id = id;
         this.name = name;
         this.rarity = rarity;
@@ -66,19 +59,6 @@ public class Item {
         return null;
     }
 
-    private String getLongestWord() {
-        List<String> list = description.stream().map(Item::removeColor).collect(Collectors.toList());
-        list.add(removeColor(name));
-        list.add(removeColor(rarity));
-        String longest = "";
-        for (String str : list) {
-            if (str.length() > longest.length()) {
-                longest = str;
-            }
-        }
-        return longest;
-    }
-
     private boolean hasMagic() {
         for (String str : lore) {
             if (str.contains("&k")) {
@@ -88,17 +68,36 @@ public class Item {
         return false;
     }
 
-    private int width (String word, Font font) {
-        int size = 0;
-        char[] charArray = word.toCharArray();
+    private int width () {
+        List<Integer> sizes = new ArrayList<>();
         BufferedImage bufferedImage = new BufferedImage(1, 1,
                 BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = bufferedImage.createGraphics();
-        graphics.setFont(font);
-        for (char c : charArray) {
-            size += graphics.getFontMetrics().stringWidth(String.valueOf(c));
+        graphics.setFont(Main.regularFont);
+        boolean checking = false;
+        Color lastColor = Color.WHITE;
+        for (String l : lore) {
+            int size = 0;
+            for (char c : l.toCharArray()) {
+                String line = String.valueOf(c);
+                if (line.equals("&")) {
+                    checking = true;
+                    continue;
+                }
+                if (checking) {
+                    if (ColorCodes.ALL_CODES.contains(line)) {
+                        lastColor = check2(line, lastColor, graphics);
+                        checking = false;
+                        continue;
+                    }
+                    checking = false;
+                }
+                size += graphics.getFontMetrics().stringWidth(String.valueOf(c));
+            }
+            sizes.add(size);
         }
-        return size;
+        //return the largest size in the array
+        return sizes.stream().max(Integer::compareTo).get();
     }
 
     private int height (Font font) {
@@ -109,16 +108,19 @@ public class Item {
         return graphics.getFontMetrics().getHeight();
     }
 
-    public String build(Guild guild, Member member) {
+    public String build(String guild, String member) {
         long ms = System.currentTimeMillis();
         lore = new ArrayList<>();
         lore.add(name);
-        for (Stat stat : stats.keySet()) {
-            lore.add("&7" + stat.name() + ": " + stats.get(stat));
+        if (!stats.isEmpty()) {
+            for (Stat stat : stats.keySet()) {
+                lore.add("&7" + stat.name() + ": " + stats.get(stat));
+            }
+            lore.add("");
         }
         lore.addAll(description);
         lore.add(rarity);
-        int width = 10 + width(getLongestWord(), Main.regularFont);
+        int width = 14 + width();
         int height = 10 + lore.size() * height(Main.regularFont);
         BufferedImage bufferedImage = new BufferedImage(width, height,
                 BufferedImage.TYPE_INT_RGB);
@@ -153,11 +155,11 @@ public class Item {
                     }
                     checking = false;
                     graphics.setColor(lastColor);
-                    graphics.drawString("&", 7 + h, 15 + (i) * 11);
+                    graphics.drawString("&", 10 + h, graphics.getFontMetrics().getHeight() + (i) * graphics.getFontMetrics().getHeight());
                     h += graphics.getFontMetrics().stringWidth("&");
                 }
                 graphics.setColor(lastColor);
-                graphics.drawString(line, 7 + h, 15 + (i) * 11);
+                graphics.drawString(line, 10 + h, graphics.getFontMetrics().getHeight() + (i) * graphics.getFontMetrics().getHeight());
                 h += graphics.getFontMetrics().stringWidth(line);
             }
         }
@@ -183,11 +185,11 @@ public class Item {
                     }
                     checking = false;
                     graphics.setColor(lastColor);
-                    graphics.drawString("&", 6 + h, 14 + (i) * 11);
+                    graphics.drawString("&", 9 + h, graphics.getFontMetrics().getHeight() - 1 + (i) * graphics.getFontMetrics().getHeight());
                     h += graphics.getFontMetrics().stringWidth("&");
                 }
                 graphics.setColor(lastColor);
-                graphics.drawString(line, 6 + h, 14 + (i) * 11);
+                graphics.drawString(line, 9 + h, graphics.getFontMetrics().getHeight() - 1 + (i) * graphics.getFontMetrics().getHeight());
                 h += graphics.getFontMetrics().stringWidth(line);
             }
         }
@@ -196,18 +198,18 @@ public class Item {
             System.out.println("Created image in " + (System.currentTimeMillis() - ms) + "ms");
             String url = null;
             try {
-                new File(guild.getId()).mkdir();
-                File file = new File(guild.getId() + "/" + "Skysmith-" + member.getId() + ".png");
+                new File(guild).mkdir();
+                File file = new File(guild + "/" + "Skysmith-" + member + ".png");
                 file.createNewFile();
                 ImageIO.write(bufferedImage, "png", file);
-                String key = UUID.randomUUID() + ".png";
-                if (KEYS.containsKey(member.getId())) {
-                    s3.deleteObject(new DeleteObjectRequest("skysmith", KEYS.get(member.getId())));
+                /*try {
+                    Uploader uploader = new FileUploader(Main.client, file);
+                    com.uploadcare.api.File file2 = uploader.upload().save();
+                    url = file2.getOriginalFileUrl().toString();
+                } catch (UploadFailureException e) {
+                    System.out.println("Upload failed :(");
                 }
-                KEYS.put(member.getId(), key);
-                s3.putObject(new PutObjectRequest("skysmith", key, file).withCannedAcl(CannedAccessControlList.PublicRead));
-                url = "https://usc1.contabostorage.com/4257d5acc380420aa2c24da0d5f7c8bb:skysmith/" + key;
-                System.out.println(url);
+                System.out.println(url);*/
             } catch (IOException e) {
                 System.out.println("Upload failed :(");
             }
@@ -250,11 +252,11 @@ public class Item {
         return amount;
     }
 
-    private String buildMagic(Guild guild, Member member, Long ms) {
+    private String buildMagic(String guild, String member, Long ms) {
         ArrayList<String> thing = new ArrayList<>();
         ArrayList<BufferedImage> images = new ArrayList<>();
         for (int e = 0; e < 136; e++) {
-            int width = 10 + width(getLongestWord(), Main.regularFont);
+            int width = 10 + width();
             int height = 14 + lore.size() * 10;
             BufferedImage bufferedImage = new BufferedImage(width, height,
                     BufferedImage.TYPE_INT_RGB);
@@ -339,19 +341,19 @@ public class Item {
         GifSequenceWriter gif = null;
         String url = null;
         try {
-            File file = new File(guild.getId() + "/" + "Skysmith-" + member.getId() + ".png");
+            File file = new File(guild + "/" + "Skysmith-" + member + ".png");
             gif = new GifSequenceWriter(ImageIO.createImageOutputStream(file), 1, 20, true);
             for (BufferedImage img : images) {
                 gif.writeToSequence(img);
             }
             gif.close();
-            try {
+            /*try {
                 Uploader uploader = new FileUploader(Main.client, file);
                 com.uploadcare.api.File file2 = uploader.upload().save();
                 url = file2.getOriginalFileUrl().toString();
             } catch (UploadFailureException e) {
                 System.out.println("Upload failed :(");
-            }
+            }*/
         } catch (IOException e) {
             e.printStackTrace();
         }

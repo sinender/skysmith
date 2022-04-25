@@ -16,7 +16,7 @@ public class Finish extends Page {
         embedBuilder.setDescription("Thank You for using SkySmith Item Creator. If the image below is shrinked down, that means discord has compressed your image. Click on the image and click open original to see the full image. I suggest joining our discord server: https://discord.gg/38CatS7smV");
         if (member != null) {
             embedBuilder.addField("ID", Item.currentlyEditing.get(member.getId()).id, true);
-            embedBuilder.setImage(Item.currentlyEditing.get(member.getId()).build(member.getGuild(), member));
+            embedBuilder.setImage(Item.currentlyEditing.get(member.getId()).build(member.getGuild().getId(), member.getId()));
         }
         set(new Button() {
             @Override

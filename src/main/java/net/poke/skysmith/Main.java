@@ -1,16 +1,5 @@
 package net.poke.skysmith;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.Protocol;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Builder;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.util.StringUtils;
 import com.uploadcare.api.Client;
 import com.uploadcare.api.Project;
 import net.dv8tion.jda.api.JDA;
@@ -27,6 +16,7 @@ import net.poke.skysmith.command.pages.revamped.pages.createpage.Description;
 import net.poke.skysmith.command.pages.revamped.pages.createpage.Finish;
 import net.poke.skysmith.command.pages.revamped.pages.createpage.Stats;
 import net.poke.skysmith.command.pages.revamped.pages.description.*;
+import net.poke.skysmith.utils.Item;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
@@ -36,6 +26,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class Main {
     public static JDA jda = null;
@@ -43,7 +34,6 @@ public class Main {
     public static Font boldFont = null;
     public static Client client = null;
     public static Project project = null;
-    public static AmazonS3 s3 = null;
     public static ArrayList<Page> PAGES = new ArrayList<Page>();
     public static Project.Collaborator owner = null;
     public static void main(String[] args) throws LoginException, IOException, URISyntaxException, FontFormatException {
@@ -52,11 +42,11 @@ public class Main {
     public void create () throws LoginException, IOException, FontFormatException, URISyntaxException {
         GraphicsEnvironment ge =
                 GraphicsEnvironment.getLocalGraphicsEnvironment();
-        regularFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftRegular.otf")).deriveFont(10f);
+        regularFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftNormal.ttf")).deriveFont(24f);
         ge.registerFont(regularFont);
-        boldFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftBold.otf")).deriveFont(10f);
+        boldFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftBold.otf")).deriveFont(24f);
         ge.registerFont(boldFont);
-        JDABuilder builder = JDABuilder.createDefault("OTU2NjU3Njg3MjEzNTEwNjY2.Yjza5g.LUCe1CW54Qrmp9-WgKuo_040pQk");
+        /*JDABuilder builder = JDABuilder.createDefault("OTU2NjU3Njg3MjEzNTEwNjY2.Yjza5g.LUCe1CW54Qrmp9-WgKuo_040pQk");
         builder.disableCache(Arrays.asList(CacheFlag.values()));
         builder.enableCache(CacheFlag.EMOTE);
         builder.setActivity(Activity.watching("people make items."));
@@ -64,25 +54,33 @@ public class Main {
         jda = builder.build();
         initCommands();
         registerPages();
+         */
         client = new Client("c20c51a4c8f8ffaa9ef7", "9ceb71406b00148119c9");
-        AWSCredentials credentials = new BasicAWSCredentials("a91b4c4885614d05bd10fcb91c0c3853", "808b50860f95f65737050e2ec9dabdc0");
-
-        ClientConfiguration clientConfig = new ClientConfiguration();
-        clientConfig.setProtocol(Protocol.HTTP);
-        AmazonS3Builder<AmazonS3ClientBuilder, AmazonS3> builder2 = AmazonS3ClientBuilder.
-                standard().
-                withPathStyleAccessEnabled(true).
-                withClientConfiguration(clientConfig).
-                withCredentials(new AWSStaticCredentialsProvider(credentials)).
-                withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("usc1.contabostorage.com", "us-central-1"));
-        s3 = builder2.build();
-        List<Bucket> buckets = s3.listBuckets();
-        for (Bucket bucket : buckets) {
-            System.out.println(bucket.getName() + "\t" +
-                    StringUtils.fromDate(bucket.getCreationDate()));
-        }
         project = client.getProject();
         owner = project.getOwner();
+
+        new Item(UUID.randomUUID().toString(), "&6Necron's Chestplate", Arrays.asList(
+                "&7Gear Score: &d634",
+                "&7Strength: &c+40",
+                "&7Crit Damage: &c+30%",
+                "&7Health: &a+260",
+                "&7Defense: &a+140",
+                "&7Intelligence: &a+10",
+                " &8[&8❁&8] &8[&8⚔&8]",
+                "",
+                "&7Reduces the damage you take",
+                "&7from withers by &c10%&7.",
+                "",
+                "&6Full Set Bonus: Witherborn",
+                "&7Spawns a wither minion every",
+                "&7&e30 &7seconds up to a maximum",
+                "&7&a1 &7wither. Your withers will",
+                "&7travel to and explode on nearby",
+                "&7enemies.",
+                "",
+                "&7&8This item can be reforged!",
+                "&7&4❣ &cRequires &aCatacombs Floor VII",
+                "&aCompletion"), "&6&lLEGENDARY DUNGEON CHESTPLATE").build("test", "test");
     }
 
     private void initCommands() {
