@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Item {
@@ -141,8 +142,14 @@ public class Item {
             graphics.setFont(Main.regularFont);
             format = 0;
             boolean checking = false;
+            String regex = "[\uE700-\uE72E\uE730\uE731\uE734\uE735\uE737-\uE756]";
+            Pattern p = Pattern.compile(regex);
             for (int j = 0; j < charArray.length; j++) {
                 String line = String.valueOf(charArray[j]);
+                if (!graphics.getFont().canDisplay(charArray[j])) {
+                    System.out.println("Cannot display " + charArray[j]);
+                    graphics.setFont(Main.unicodeFont.deriveFont(22f));
+                }
                 if (line.equals("&")) {
                     checking = true;
                     continue;
@@ -173,6 +180,10 @@ public class Item {
             boolean checking = false;
             for (int j = 0; j < charArray.length; j++) {
                 String line = String.valueOf(charArray[j]);
+                if (!graphics.getFont().canDisplay(charArray[j])) {
+                    System.out.println("Cannot display " + charArray[j]);
+                    graphics.setFont(Main.unicodeFont.deriveFont(22f));
+                }
                 if (line.equals("&")) {
                     checking = true;
                     continue;
@@ -282,8 +293,14 @@ public class Item {
                 graphics.setFont(Main.regularFont);
                 format = 0;
                 boolean checking = false;
+                String regex = "[\uE700-\uE72E\uE730\uE731\uE734\uE735\uE737-\uE756]";
+                Pattern p = Pattern.compile(regex);
                 for (char value : charArray) {
                     String line = String.valueOf(value);
+
+                    if (graphics.getFont().canDisplay(value)) {
+                        System.out.println("Cannot display " + line);
+                    }
                     if (line.equals("&")) {
                         checking = true;
                         continue;
@@ -409,6 +426,9 @@ public class Item {
 
     private Color check2(String current, Color lastColor, Graphics2D graphics) {
         for (ColorCodes c : ColorCodes.values()) {
+            if (c.toString().matches("[\uE700-\uE72E\uE730\uE731\uE734\uE735\uE737-\uE756]")) {
+                graphics.setFont(Font.getFont("segoe-ui-emoji").deriveFont(22f));
+            }
             if (c.toString().equals("&" + current)) {
                 switch (c) {
                     case BOLD: {
@@ -427,8 +447,14 @@ public class Item {
                     }
                 }
                 if (c.shadowHex == null) return lastColor;
+                if (c.toString().matches("[\uE700-\uE72E\uE730\uE731\uE734\uE735\uE737-\uE756]")) {
+                    format = 3;
+                }
                 return Color.decode(c.shadowHex);
             }
+        }
+        if (current.toString().matches("[\uE700-\uE72E\uE730\uE731\uE734\uE735\uE737-\uE756]")) {
+            format = 3;
         }
         return lastColor;
     }

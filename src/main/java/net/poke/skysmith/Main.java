@@ -32,6 +32,7 @@ public class Main {
     public static JDA jda = null;
     public static Font regularFont = null;
     public static Font boldFont = null;
+    public static Font unicodeFont = null;
     public static Client client = null;
     public static Project project = null;
     public static ArrayList<Page> PAGES = new ArrayList<Page>();
@@ -42,9 +43,11 @@ public class Main {
     public void create () throws LoginException, IOException, FontFormatException, URISyntaxException {
         GraphicsEnvironment ge =
                 GraphicsEnvironment.getLocalGraphicsEnvironment();
-        regularFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftNormal.ttf")).deriveFont(24f);
+        regularFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftRegular.otf")).deriveFont(22f);
         ge.registerFont(regularFont);
-        boldFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftBold.otf")).deriveFont(24f);
+        unicodeFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftNormal.ttf")).deriveFont(22f);
+        ge.registerFont(unicodeFont);
+        boldFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftBold.otf")).deriveFont(22f);
         ge.registerFont(boldFont);
         /*JDABuilder builder = JDABuilder.createDefault("OTU2NjU3Njg3MjEzNTEwNjY2.Yjza5g.LUCe1CW54Qrmp9-WgKuo_040pQk");
         builder.disableCache(Arrays.asList(CacheFlag.values()));
@@ -80,7 +83,7 @@ public class Main {
                 "",
                 "&7&8This item can be reforged!",
                 "&7&4❣ &cRequires &aCatacombs Floor VII",
-                "&aCompletion"), "&6&lLEGENDARY DUNGEON CHESTPLATE").build("test", "test");
+                "&aCompletion"), "&l&6LEGENDARY DUNGEON CHESTPLATE").build("test", "test");
     }
 
     private void initCommands() {
