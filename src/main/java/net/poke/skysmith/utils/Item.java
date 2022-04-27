@@ -127,8 +127,6 @@ public class Item {
                 BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = bufferedImage.createGraphics();
 
-        graphics.setFont(Main.regularFont);
-
         graphics.setColor(new Color(44, 8, 99, 255));
         graphics.drawRect(2, 2, width - 5, height - 5);
 
@@ -137,52 +135,19 @@ public class Item {
         for (int i = 0; i < lore.size(); i++) {
             char[] charArray = lore.get(i).toCharArray();
             int h = 0;
-            String last = null;
-            Color lastColor = Color.decode("#3f3f3f");
-            graphics.setFont(Main.regularFont);
-            format = 0;
-            boolean checking = false;
-            String regex = "[\uE700-\uE72E\uE730\uE731\uE734\uE735\uE737-\uE756]";
-            Pattern p = Pattern.compile(regex);
-            for (int j = 0; j < charArray.length; j++) {
-                String line = String.valueOf(charArray[j]);
-                if (!graphics.getFont().canDisplay(charArray[j])) {
-                    System.out.println("Cannot display " + charArray[j]);
-                    graphics.setFont(Main.unicodeFont.deriveFont(22f));
-                }
-                if (line.equals("&")) {
-                    checking = true;
-                    continue;
-                }
-                if (checking) {
-                    if (ColorCodes.ALL_CODES.contains(line)) {
-                        lastColor = check2(line, lastColor, graphics);
-                        checking = false;
-                        continue;
-                    }
-                    checking = false;
-                    graphics.setColor(lastColor);
-                    graphics.drawString("&", 10 + h, graphics.getFontMetrics().getHeight() + (i) * graphics.getFontMetrics().getHeight());
-                    h += graphics.getFontMetrics().stringWidth("&");
-                }
-                graphics.setColor(lastColor);
-                graphics.drawString(line, 10 + h, graphics.getFontMetrics().getHeight() + (i) * graphics.getFontMetrics().getHeight());
-                h += graphics.getFontMetrics().stringWidth(line);
-            }
-        }
-
-        for (int i = 0; i < lore.size(); i++) {
-            char[] charArray = lore.get(i).toCharArray();
-            int h = 0;
-            String last = null;
             Color lastColor = Color.WHITE;
-            graphics.setFont(Main.regularFont);
+            Color lastColor2 = Color.decode("#3f3f3f");
             boolean checking = false;
-            for (int j = 0; j < charArray.length; j++) {
-                String line = String.valueOf(charArray[j]);
-                if (!graphics.getFont().canDisplay(charArray[j])) {
-                    System.out.println("Cannot display " + charArray[j]);
-                    graphics.setFont(Main.unicodeFont.deriveFont(22f));
+            for (char c : charArray) {
+                int xoffset = 0;
+                int yoffset = 0;
+                String line = String.valueOf(c);
+                if (!graphics.getFont().canDisplay(c)) {
+                    System.out.println("Cannot display " + c);
+                    graphics.setFont(Main.unicodeFont);
+                    yoffset += ((i + 1)*graphics.getFontMetrics().getHeight()) - Math.max(2.5 ,i-13.35)*graphics.getFontMetrics().getHeight();
+                } else {
+                    graphics.setFont(Main.regularFont);
                 }
                 if (line.equals("&")) {
                     checking = true;
@@ -191,16 +156,21 @@ public class Item {
                 if (checking) {
                     if (ColorCodes.ALL_CODES.contains(line)) {
                         lastColor = check(line, lastColor, graphics);
+                        lastColor2 = check2(line, lastColor, graphics);
                         checking = false;
                         continue;
                     }
                     checking = false;
+                    graphics.setColor(lastColor2);
+                    graphics.drawString("&", 10 + h + xoffset, (graphics.getFontMetrics().getHeight() + (i) * graphics.getFontMetrics().getHeight()) + yoffset);
                     graphics.setColor(lastColor);
-                    graphics.drawString("&", 9 + h, graphics.getFontMetrics().getHeight() - 1 + (i) * graphics.getFontMetrics().getHeight());
+                    graphics.drawString("&", 8 + h + xoffset, (graphics.getFontMetrics().getHeight() - 2 + (i) * graphics.getFontMetrics().getHeight()) + yoffset);
                     h += graphics.getFontMetrics().stringWidth("&");
                 }
+                graphics.setColor(lastColor2);
+                graphics.drawString(line, 10 + h + xoffset, (graphics.getFontMetrics().getHeight() + (i) * graphics.getFontMetrics().getHeight()) + yoffset);
                 graphics.setColor(lastColor);
-                graphics.drawString(line, 9 + h, graphics.getFontMetrics().getHeight() - 1 + (i) * graphics.getFontMetrics().getHeight());
+                graphics.drawString(line, 8 + h + xoffset, (graphics.getFontMetrics().getHeight() - 2 + (i) * graphics.getFontMetrics().getHeight()) + yoffset);
                 h += graphics.getFontMetrics().stringWidth(line);
             }
         }

@@ -45,7 +45,7 @@ public class Main {
                 GraphicsEnvironment.getLocalGraphicsEnvironment();
         regularFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftRegular.otf")).deriveFont(22f);
         ge.registerFont(regularFont);
-        unicodeFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftNormal.ttf")).deriveFont(22f);
+        unicodeFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftNormal.ttf")).deriveFont(16f);
         ge.registerFont(unicodeFont);
         boldFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftBold.otf")).deriveFont(22f);
         ge.registerFont(boldFont);
@@ -84,6 +84,30 @@ public class Main {
                 "&7&8This item can be reforged!",
                 "&7&4❣ &cRequires &aCatacombs Floor VII",
                 "&aCompletion"), "&l&6LEGENDARY DUNGEON CHESTPLATE").build("test", "test");
+        //list of 30 unicode emojis and its names
+        String[] strings = new String[]{""};
+        new Item(UUID.randomUUID().toString(), "&6Test item", Arrays.asList(
+                "Unicode Character “©” (U+00A9)",
+                "Unicode Character “®” (U+00AE)",
+                "Unicode Character “™” (U+2122)",
+                "Unicode Character “℠” (U+2120)",
+                "Unicode Character “←” (U+2190)",
+                "Unicode Character “↑” (U+2191)",
+                "Unicode Character “→” (U+2192)",
+                "Unicode Character “↓” (U+2193)",
+                "Unicode Character “↔” (U+2194)",
+                "Unicode Character “↵” (U+21B5)",
+                "Unicode Character “⇐” (U+21D0)",
+                "Unicode Character “⇑” (U+21D1)",
+                "Unicode Character “⇒” (U+21D2)",
+                "Unicode Character “⇓” (U+21D3)",
+                "Unicode Character “♥“ (U+2665)",
+                "Unicode Character “♦“ (U+2666)",
+                "Unicode Character “♠“ (U+2660)",
+                "Unicode Character “♣“ (U+2663)",
+                "Unicode Character “♂“ (U+2642)",
+                "Unicode Character “♀“ (U+2640)"
+        ), "&l&6LEGENDARY").build("test2", "test2");
     }
 
     private void initCommands() {
