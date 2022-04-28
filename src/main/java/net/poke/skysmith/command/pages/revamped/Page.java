@@ -106,6 +106,7 @@ public class Page {
 
         this.item = Item.currentlyEditing.get(member.getId());
         embedBuilder.setImage(item.build(member.getGuild().getId(), member.getId()));
+        embedBuilder.addField("Lore", item.lore.size() <= 50 ? String.join("\n", item.lore) : String.join("\n", item.lore.subList(0, 50)), false);
 
         ArrayList<ItemComponent> components = new ArrayList<>();
         for (int i = 0; i < size; i++) {

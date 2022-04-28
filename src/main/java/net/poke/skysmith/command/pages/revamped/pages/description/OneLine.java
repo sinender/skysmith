@@ -39,7 +39,7 @@ public class OneLine extends Page {
             }
 
             @Override
-            public void run(SelectMenuInteractionEvent event) {
+            public void run(SelectMenuInteractionEvent event, SelectOption selectOption) {
                 if (event.getInteraction().getSelectedOptions().get(0).getLabel().equals("Back")) {
                     new SetLines().open(event);
                 } else {

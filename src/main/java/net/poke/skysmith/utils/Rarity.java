@@ -3,6 +3,7 @@ package net.poke.skysmith.utils;
 import net.dv8tion.jda.api.interactions.commands.Command;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public enum Rarity {
@@ -17,8 +18,8 @@ public enum Rarity {
     SUPREME(ColorCodes.DARK_RED,"SUPREME"),
     DIVINE(ColorCodes.AQUA, "DIVINE");
 
-    private final ColorCodes color;
-    private final String displayName;
+    public final ColorCodes color;
+    public final String displayName;
 
     Rarity(ColorCodes color, String displayName) {
         this.color = color;
@@ -31,5 +32,12 @@ public enum Rarity {
             rarities.add(new Command.Choice(r.displayName, r.color + r.displayName));
         }
         return rarities;
+    }
+
+    public static Rarity fromString(String text) {
+        return Arrays.stream(values())
+                .filter(v -> v.name().equalsIgnoreCase(text))
+                .findFirst()
+                .orElse(null);
     }
 }

@@ -14,8 +14,11 @@ import net.poke.skysmith.command.pages.revamped.pages.*;
 import net.poke.skysmith.command.pages.revamped.Page;
 import net.poke.skysmith.command.pages.revamped.pages.createpage.Description;
 import net.poke.skysmith.command.pages.revamped.pages.createpage.Finish;
+import net.poke.skysmith.command.pages.revamped.pages.createpage.Settings;
 import net.poke.skysmith.command.pages.revamped.pages.createpage.Stats;
 import net.poke.skysmith.command.pages.revamped.pages.description.*;
+import net.poke.skysmith.command.pages.revamped.pages.settings.Name;
+import net.poke.skysmith.command.pages.revamped.pages.settings.Rarity;
 import net.poke.skysmith.utils.Item;
 
 import javax.security.auth.login.LoginException;
@@ -49,7 +52,7 @@ public class Main {
         ge.registerFont(unicodeFont);
         boldFont = Font.createFont(Font.TRUETYPE_FONT, new File("MinecraftBold.otf")).deriveFont(22f);
         ge.registerFont(boldFont);
-        /*JDABuilder builder = JDABuilder.createDefault("OTU2NjU3Njg3MjEzNTEwNjY2.Yjza5g.LUCe1CW54Qrmp9-WgKuo_040pQk");
+        JDABuilder builder = JDABuilder.createDefault("OTU2NjU3Njg3MjEzNTEwNjY2.Yjza5g.LUCe1CW54Qrmp9-WgKuo_040pQk");
         builder.disableCache(Arrays.asList(CacheFlag.values()));
         builder.enableCache(CacheFlag.EMOTE);
         builder.setActivity(Activity.watching("people make items."));
@@ -57,57 +60,9 @@ public class Main {
         jda = builder.build();
         initCommands();
         registerPages();
-         */
         client = new Client("c20c51a4c8f8ffaa9ef7", "9ceb71406b00148119c9");
         project = client.getProject();
         owner = project.getOwner();
-
-        new Item(UUID.randomUUID().toString(), "&6Necron's Chestplate", Arrays.asList(
-                "&7Gear Score: &d634",
-                "&7Strength: &c+40",
-                "&7Crit Damage: &c+30%",
-                "&7Health: &a+260",
-                "&7Defense: &a+140",
-                "&7Intelligence: &a+10",
-                " &8[&8❁&8] &8[&8⚔&8]",
-                "",
-                "&7Reduces the damage you take",
-                "&7from withers by &c10%&7.",
-                "",
-                "&6Full Set Bonus: Witherborn",
-                "&7Spawns a wither minion every",
-                "&7&e30 &7seconds up to a maximum",
-                "&7&a1 &7wither. Your withers will",
-                "&7travel to and explode on nearby",
-                "&7enemies.",
-                "",
-                "&7&8This item can be reforged!",
-                "&7&4❣ &cRequires &aCatacombs Floor VII",
-                "&aCompletion"), "&l&6LEGENDARY DUNGEON CHESTPLATE").build("test", "test");
-        //list of 30 unicode emojis and its names
-        String[] strings = new String[]{""};
-        new Item(UUID.randomUUID().toString(), "&6Test item", Arrays.asList(
-                "Unicode Character “©” (U+00A9)",
-                "Unicode Character “®” (U+00AE)",
-                "Unicode Character “™” (U+2122)",
-                "Unicode Character “℠” (U+2120)",
-                "Unicode Character “←” (U+2190)",
-                "Unicode Character “↑” (U+2191)",
-                "Unicode Character “→” (U+2192)",
-                "Unicode Character “↓” (U+2193)",
-                "Unicode Character “↔” (U+2194)",
-                "Unicode Character “↵” (U+21B5)",
-                "Unicode Character “⇐” (U+21D0)",
-                "Unicode Character “⇑” (U+21D1)",
-                "Unicode Character “⇒” (U+21D2)",
-                "Unicode Character “⇓” (U+21D3)",
-                "Unicode Character “♥“ (U+2665)",
-                "Unicode Character “♦“ (U+2666)",
-                "Unicode Character “♠“ (U+2660)",
-                "Unicode Character “♣“ (U+2663)",
-                "Unicode Character “♂“ (U+2642)",
-                "Unicode Character “♀“ (U+2640)"
-        ), "&l&6LEGENDARY").build("test2", "test2");
     }
 
     private void initCommands() {
@@ -124,5 +79,8 @@ public class Main {
         PAGES.add(new MultipleLines());
         PAGES.add(new Finish(null));
         PAGES.add(new Stats(null));
+        PAGES.add(new Settings());
+        PAGES.add(new Rarity());
+        PAGES.add(new Name());
     }
 }

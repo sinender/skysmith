@@ -42,7 +42,7 @@ public class PageListener extends ListenerAdapter {
         for (Page page : PAGES) {
             if (page.getTitle().equals(event.getSelectMenu().getId().split("-")[0])) {
                 if (page.get(0) instanceof Selection) {
-                    ((Selection)page.get(0)).run(event);
+                    ((Selection)page.get(0)).run(event, event.getSelectedOptions().get(0));
                 }
             }
         }

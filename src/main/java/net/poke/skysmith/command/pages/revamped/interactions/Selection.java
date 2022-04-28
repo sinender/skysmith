@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface Selection extends Interaction {
     List<SelectOption> options();
-    void run (SelectMenuInteractionEvent event);
+    void run (SelectMenuInteractionEvent event, SelectOption selectedOption);
 }

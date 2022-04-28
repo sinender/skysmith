@@ -6,6 +6,7 @@ import net.poke.skysmith.command.pages.revamped.Page;
 import net.poke.skysmith.command.pages.revamped.interactions.Button;
 import net.poke.skysmith.command.pages.revamped.pages.createpage.Description;
 import net.poke.skysmith.command.pages.revamped.pages.createpage.Finish;
+import net.poke.skysmith.command.pages.revamped.pages.createpage.Settings;
 import net.poke.skysmith.command.pages.revamped.pages.createpage.Stats;
 import net.poke.skysmith.utils.ButtonColor;
 
@@ -89,7 +90,7 @@ public class CreatePage extends Page {
 
             @Override
             public void run(ButtonInteractionEvent e) {
-
+                new Settings().open(e);
             }
         });
         set(new Button() {

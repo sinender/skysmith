@@ -27,17 +27,16 @@ public enum ColorCodes {
     UNDERLINE('n', "underline", null, null),
     RESET('r', "reset", null, null);
 
-    public static final char COLOR_CHAR = '§';
+    public static final char COLOR_CHAR = '&';
     public static final String ALL_CODES = "0123456789AaBbCcDdEeFfKkLlMmNnRr";
-    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
-    private static final Map<Character, ColorCodes> BY_CHAR = new HashMap();
+    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('&') + "[0-9A-FK-OR]");
     private final char code;
     private final String toString;
     private final String name;
     public final String hex;
     public final String shadowHex;
 
-    private ColorCodes(char code, String name, String hex, String shadowHex) {
+    ColorCodes(char code, String name, String hex, String shadowHex) {
         this.code = code;
         this.name = name;
         this.hex = hex;
@@ -47,5 +46,9 @@ public enum ColorCodes {
 
     public String toString() {
         return this.toString;
+    }
+
+    public static String stripColor(String input) {
+        return input == null ? null : STRIP_COLOR_PATTERN.matcher(input).replaceAll("");
     }
 }

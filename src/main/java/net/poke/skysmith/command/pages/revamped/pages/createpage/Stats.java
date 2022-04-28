@@ -40,7 +40,7 @@ public class Stats extends Page {
             }
 
             @Override
-            public void run(SelectMenuInteractionEvent event) {
+            public void run(SelectMenuInteractionEvent event, SelectOption selectOption) {
                 if (event.getInteraction().getSelectedOptions().get(0).getValue().equals("Back")) {
                     new CreatePage().open(event);
                 } else {

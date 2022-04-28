@@ -6,12 +6,18 @@ import com.uploadcare.upload.Uploader;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.poke.skysmith.Main;
+import org.bson.Document;
 
-import javax.imageio.ImageIO;
+import javax.imageio.*;
+import javax.imageio.metadata.IIOInvalidTreeException;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.metadata.IIOMetadataNode;
+import javax.imageio.stream.ImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -38,14 +44,17 @@ public class Item {
         lore = new ArrayList<>();
         stats = new HashMap<>();
     }
+
     public Item addLine(String line) {
         description.add(line);
         return this;
     }
+
     public Item removeLine(int index) {
         description.remove(index);
         return this;
     }
+
     public Item setLine(int index, String str) {
         Utils.setLoreLine(index, this, str);
         return this;
@@ -69,7 +78,7 @@ public class Item {
         return false;
     }
 
-    private int width () {
+    private int width() {
         List<Integer> sizes = new ArrayList<>();
         BufferedImage bufferedImage = new BufferedImage(1, 1,
                 BufferedImage.TYPE_INT_RGB);
@@ -101,7 +110,7 @@ public class Item {
         return sizes.stream().max(Integer::compareTo).get();
     }
 
-    private int height (Font font) {
+    private int height(Font font) {
         BufferedImage bufferedImage = new BufferedImage(1, 1,
                 BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = bufferedImage.createGraphics();
@@ -115,7 +124,7 @@ public class Item {
         lore.add(name);
         if (!stats.isEmpty()) {
             for (Stat stat : stats.keySet()) {
-                lore.add("&7" + stat.name() + ": " + stats.get(stat));
+                lore.add("&7" + stat.displayName + ": " + stat.color + "+" + stats.get(stat) + stat.suffix);
             }
             lore.add("");
         }
@@ -126,6 +135,10 @@ public class Item {
         BufferedImage bufferedImage = new BufferedImage(width, height,
                 BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = bufferedImage.createGraphics();
+        graphics.setFont(Main.regularFont);
+        float fontHeight = 0;
+        format = 0;
+        fontHeight = graphics.getFontMetrics().getHeight();
 
         graphics.setColor(new Color(44, 8, 99, 255));
         graphics.drawRect(2, 2, width - 5, height - 5);
@@ -143,11 +156,15 @@ public class Item {
                 int yoffset = 0;
                 String line = String.valueOf(c);
                 if (!graphics.getFont().canDisplay(c)) {
-                    System.out.println("Cannot display " + c);
                     graphics.setFont(Main.unicodeFont);
-                    yoffset += ((i + 1)*graphics.getFontMetrics().getHeight()) - Math.max(2.5 ,i-13.35)*graphics.getFontMetrics().getHeight();
                 } else {
-                    graphics.setFont(Main.regularFont);
+                    if (format == 1) {
+                        graphics.setFont(Main.boldFont);
+                        fontHeight = graphics.getFontMetrics().getHeight();
+                    } else {
+                        graphics.setFont(Main.regularFont);
+                        fontHeight = graphics.getFontMetrics().getHeight();
+                    }
                 }
                 if (line.equals("&")) {
                     checking = true;
@@ -156,25 +173,25 @@ public class Item {
                 if (checking) {
                     if (ColorCodes.ALL_CODES.contains(line)) {
                         lastColor = check(line, lastColor, graphics);
-                        lastColor2 = check2(line, lastColor, graphics);
+                        lastColor2 = check2(line, lastColor2, graphics);
                         checking = false;
                         continue;
                     }
                     checking = false;
                     graphics.setColor(lastColor2);
-                    graphics.drawString("&", 10 + h + xoffset, (graphics.getFontMetrics().getHeight() + (i) * graphics.getFontMetrics().getHeight()) + yoffset);
+                    graphics.drawString("&", 10 + h + xoffset, (fontHeight + (i) * fontHeight) + yoffset);
                     graphics.setColor(lastColor);
-                    graphics.drawString("&", 8 + h + xoffset, (graphics.getFontMetrics().getHeight() - 2 + (i) * graphics.getFontMetrics().getHeight()) + yoffset);
+                    graphics.drawString("&", 8 + h + xoffset, (fontHeight - 2 + (i) * fontHeight) + yoffset);
                     h += graphics.getFontMetrics().stringWidth("&");
                 }
                 graphics.setColor(lastColor2);
-                graphics.drawString(line, 10 + h + xoffset, (graphics.getFontMetrics().getHeight() + (i) * graphics.getFontMetrics().getHeight()) + yoffset);
+                graphics.drawString(line, 10 + h + xoffset, (fontHeight + (i) * fontHeight) + yoffset);
                 graphics.setColor(lastColor);
-                graphics.drawString(line, 8 + h + xoffset, (graphics.getFontMetrics().getHeight() - 2 + (i) * graphics.getFontMetrics().getHeight()) + yoffset);
+                graphics.drawString(line, 8 + h + xoffset, ((fontHeight - 2) + ((i) * fontHeight)) + yoffset);
                 h += graphics.getFontMetrics().stringWidth(line);
             }
+            format = 0;
         }
-
         if (!hasMagic()) {
             System.out.println("Created image in " + (System.currentTimeMillis() - ms) + "ms");
             String url = null;
@@ -183,14 +200,13 @@ public class Item {
                 File file = new File(guild + "/" + "Skysmith-" + member + ".png");
                 file.createNewFile();
                 ImageIO.write(bufferedImage, "png", file);
-                /*try {
+                try {
                     Uploader uploader = new FileUploader(Main.client, file);
                     com.uploadcare.api.File file2 = uploader.upload().save();
                     url = file2.getOriginalFileUrl().toString();
                 } catch (UploadFailureException e) {
                     System.out.println("Upload failed :(");
                 }
-                System.out.println(url);*/
             } catch (IOException e) {
                 System.out.println("Upload failed :(");
             }
@@ -207,140 +223,90 @@ public class Item {
         return String.valueOf(magic.charAt(new Random().nextInt(magic.length())));
     }
 
-    private int getMagicChars(String str) {
-        int amount = 1;
-        if (str.contains("&k")) {
-            char[] charArray = str.toCharArray();
-            boolean checking = false;
-            for (int j = 0; j < charArray.length; j++) {
-                String line = String.valueOf(charArray[j]);
-                if (line.equals("&")) {
-                    checking = true;
-                    continue;
-                }
-                if (checking) {
-                    if (ColorCodes.ALL_CODES.contains(line)) {
-                        formatCheck(line);
-                        if (format == 2) amount -= 2;
-                    }
-                    checking = false;
-                }
-                if (format == 2) {
-                    amount++;
-                }
-            }
-        }
-        return amount;
-    }
-
     private String buildMagic(String guild, String member, Long ms) {
-        ArrayList<String> thing = new ArrayList<>();
         ArrayList<BufferedImage> images = new ArrayList<>();
-        for (int e = 0; e < 136; e++) {
-            int width = 10 + width();
-            int height = 14 + lore.size() * 10;
-            BufferedImage bufferedImage = new BufferedImage(width, height,
+        ArrayList<String> newLore = new ArrayList<>();
+        for (int e = 0; e < 50; e++) {
+            int width = 14 + width();
+            int height = 10 + lore.size() * height(Main.regularFont);
+            BufferedImage firstImage = new BufferedImage(width, height,
                     BufferedImage.TYPE_INT_RGB);
-            Graphics2D graphics = bufferedImage.createGraphics();
+            Graphics2D g = firstImage.createGraphics();
+            g.setFont(Main.regularFont);
+            float fontHeight1 = 0;
+            format = 0;
+            fontHeight1 = g.getFontMetrics().getHeight();
 
-            graphics.setFont(Main.regularFont);
+            g.setColor(new Color(44, 8, 99, 255));
+            g.drawRect(2, 2, width - 5, height - 5);
 
-            graphics.setColor(new Color(44, 8, 99, 255));
-            graphics.drawRect(2, 2, width - 5, height - 5);
-
-            graphics.setColor(new Color(85, 85, 85));
+            g.setColor(new Color(85, 85, 85));
 
             for (int i = 0; i < lore.size(); i++) {
-                thing.clear();
-                int magic = 0;
-                for (int b = 0; b < getMagicChars(lore.get(i)); b++) {
-                    thing.add(randomMagic());
-                }
                 char[] charArray = lore.get(i).toCharArray();
                 int h = 0;
-                String last = null;
-                Color lastColor = Color.decode("#3f3f3f");
-                graphics.setFont(Main.regularFont);
-                format = 0;
+                Color lastColor = Color.WHITE;
+                Color lastColor2 = Color.decode("#3f3f3f");
                 boolean checking = false;
-                String regex = "[\uE700-\uE72E\uE730\uE731\uE734\uE735\uE737-\uE756]";
-                Pattern p = Pattern.compile(regex);
-                for (char value : charArray) {
-                    String line = String.valueOf(value);
-
-                    if (graphics.getFont().canDisplay(value)) {
-                        System.out.println("Cannot display " + line);
-                    }
-                    if (line.equals("&")) {
-                        checking = true;
-                        continue;
-                    }
-                    if (checking) {
-                        if (ColorCodes.ALL_CODES.contains(line)) {
-                            lastColor = check2(line, lastColor, graphics);
-                            checking = false;
-                            continue;
-                        }
-                        checking = false;
-                        graphics.setColor(lastColor);
-                        graphics.drawString(format == 2 ? thing.get(magic) : "&", 7 + h, 15 + (i) * 11);
-                        h += graphics.getFontMetrics().stringWidth("&");
-                        if (format == 2) magic++;
-                    }
-                    graphics.setColor(lastColor);
-                    graphics.drawString(format == 2 ? thing.get(magic) : line, 7 + h, 15 + (i) * 11);
-                    h += graphics.getFontMetrics().stringWidth(line);
-                    if (format == 2) magic++;
-                }
-
-                h = 0;
-                lastColor = Color.WHITE;
-                graphics.setFont(Main.regularFont);
-                checking = false;
-                magic = 0;
                 for (char c : charArray) {
+                    String magicChar = randomMagic();
+                    int xoffset = 0;
+                    int yoffset = 0;
                     String line = String.valueOf(c);
+                    if (!g.getFont().canDisplay(c)) {
+                        g.setFont(Main.unicodeFont);
+                    } else {
+                        if (format == 1) {
+                            g.setFont(Main.boldFont);
+                            fontHeight1 = g.getFontMetrics().getHeight();
+                        } else {
+                            g.setFont(Main.regularFont);
+                            fontHeight1 = g.getFontMetrics().getHeight();
+                        }
+                    }
                     if (line.equals("&")) {
                         checking = true;
                         continue;
                     }
                     if (checking) {
                         if (ColorCodes.ALL_CODES.contains(line)) {
-                            lastColor = check(line, lastColor, graphics);
+                            lastColor = check(line, lastColor, g);
+                            lastColor2 = check2(line, lastColor2, g);
                             checking = false;
                             continue;
                         }
                         checking = false;
-                        graphics.setColor(lastColor);
-                        graphics.drawString(format == 2 ? thing.get(magic) : "&", 6 + h, 14 + (i) * 11);
-                        h += graphics.getFontMetrics().stringWidth("&");
-                        if (format == 2) magic++;
+                        g.setColor(lastColor2);
+                        g.drawString("&", 10 + h + xoffset, (fontHeight1 + (i) * fontHeight1) + yoffset);
+                        g.setColor(lastColor);
+                        g.drawString("&", 8 + h + xoffset, (fontHeight1 - 2 + (i) * fontHeight1) + yoffset);
+                        h += g.getFontMetrics().stringWidth("&");
                     }
-                    graphics.setColor(lastColor);
-                    graphics.drawString(format == 2 ? thing.get(magic) : line, 6 + h, 14 + (i) * 11);
-                    h += graphics.getFontMetrics().stringWidth(line);
-                    if (format == 2) magic++;
+                    g.setColor(lastColor2);
+                    g.drawString(format == 2 ? magicChar : line, 10 + h + xoffset, (fontHeight1 + (i) * fontHeight1) + yoffset);
+                    g.setColor(lastColor);
+                    g.drawString(format == 2 ? magicChar : line, 8 + h + xoffset, ((fontHeight1 - 2) + ((i) * fontHeight1)) + yoffset);
+                    h += g.getFontMetrics().stringWidth(line);
                 }
+                format = 0;
             }
-            images.add(bufferedImage);
+            images.add(firstImage);
         }
-        System.out.println(images);
         GifSequenceWriter gif = null;
         String url = null;
+        System.out.println(images.size());
         try {
-            File file = new File(guild + "/" + "Skysmith-" + member + ".png");
-            gif = new GifSequenceWriter(ImageIO.createImageOutputStream(file), 1, 20, true);
-            for (BufferedImage img : images) {
-                gif.writeToSequence(img);
-            }
+            File file = new File(guild + "/" + "Skysmith-" + member + ".gif");
+            gif = new GifSequenceWriter(ImageIO.createImageOutputStream(file), BufferedImage.TYPE_INT_ARGB, 20, true);
+            for (BufferedImage image : images) gif.writeToSequence(image);
             gif.close();
-            /*try {
+            try {
                 Uploader uploader = new FileUploader(Main.client, file);
                 com.uploadcare.api.File file2 = uploader.upload().save();
                 url = file2.getOriginalFileUrl().toString();
             } catch (UploadFailureException e) {
                 System.out.println("Upload failed :(");
-            }*/
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -374,26 +340,6 @@ public class Item {
         return lastColor;
     }
 
-    private void formatCheck(String current) {
-        for (ColorCodes c : ColorCodes.values()) {
-            if (c.toString().equals("&" + current)) {
-                switch (c) {
-                    case BOLD: {
-                        format = 1;
-                        break;
-                    }
-                    case MAGIC: {
-                        format = 2;
-                        break;
-                    }
-                    case RESET: {
-                        format = 0;
-                    }
-                }
-            }
-        }
-    }
-
     private Color check2(String current, Color lastColor, Graphics2D graphics) {
         for (ColorCodes c : ColorCodes.values()) {
             if (c.toString().matches("[\uE700-\uE72E\uE730\uE731\uE734\uE735\uE737-\uE756]")) {
@@ -423,32 +369,6 @@ public class Item {
                 return Color.decode(c.shadowHex);
             }
         }
-        if (current.toString().matches("[\uE700-\uE72E\uE730\uE731\uE734\uE735\uE737-\uE756]")) {
-            format = 3;
-        }
         return lastColor;
-    }
-
-    public static String removeColor(String line) {
-        StringBuilder sb = new StringBuilder();
-        char[] charArray = line.toCharArray();
-        boolean checking = false;
-        for (char c : charArray) {
-            String l = String.valueOf(c);
-            if (l.equals("&")) {
-                checking = true;
-                continue;
-            }
-            if (checking) {
-                if (ColorCodes.ALL_CODES.contains(l)) {
-                    checking = false;
-                    continue;
-                }
-                sb.append("&");
-                checking = false;
-            }
-            sb.append(l);
-        }
-        return sb.toString();
     }
 }
