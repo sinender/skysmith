@@ -34,6 +34,8 @@ public class Item {
     public String rarity;
     public List<String> lore;
     public HashMap<Stat, Integer> stats;
+    public Boolean pureLore = false;
+    public boolean numberedLore = false;
     private int format = 0;
 
     public Item(String id, String name, List<String> description, String rarity) {
@@ -122,11 +124,16 @@ public class Item {
         long ms = System.currentTimeMillis();
         lore = new ArrayList<>();
         lore.add(name);
-        if (!stats.isEmpty()) {
+        if (!stats.isEmpty() && !pureLore) {
             for (Stat stat : stats.keySet()) {
                 lore.add("&7" + stat.displayName + ": " + stat.color + "+" + stats.get(stat) + stat.suffix);
             }
             lore.add("");
+        }
+        if (numberedLore) {
+            for (int i = 0; i < lore.size(); i++) {
+                lore.add("&c" + (i + 1) + ". &r" + lore.get(i));
+            }
         }
         lore.addAll(description);
         lore.add(rarity);
@@ -226,7 +233,7 @@ public class Item {
     private String buildMagic(String guild, String member, Long ms) {
         ArrayList<BufferedImage> images = new ArrayList<>();
         ArrayList<String> newLore = new ArrayList<>();
-        for (int e = 0; e < 50; e++) {
+        for (int e = 0; e < 25; e++) {
             int width = 14 + width();
             int height = 10 + lore.size() * height(Main.regularFont);
             BufferedImage firstImage = new BufferedImage(width, height,

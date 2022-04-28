@@ -25,6 +25,7 @@ import net.poke.skysmith.command.pages.revamped.interactions.Button;
 import net.poke.skysmith.command.pages.revamped.interactions.Interaction;
 import net.poke.skysmith.command.pages.revamped.interactions.Selection;
 import net.poke.skysmith.utils.Item;
+import net.poke.skysmith.utils.Stat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,10 +82,19 @@ public class Page {
 
         if (event instanceof SlashCommandInteractionEvent) {
             SlashCommandInteractionEvent e = (SlashCommandInteractionEvent) event;
-            e.replyEmbeds(embedBuilder.build()).addActionRow(components).queue();
+            e.replyEmbeds(embedBuilder.build()).addActionRow(components).queue(message -> {
+                new Thread(() -> {
+                    embedBuilder.setImage(item.build(member.getGuild().getId(), member.getId()));
+                    message.editOriginalEmbeds(embedBuilder.build()).setActionRow(components).queue();
+                }).start();
+            });
         } else if (event instanceof GenericComponentInteractionCreateEvent) {
             GenericComponentInteractionCreateEvent e = (GenericComponentInteractionCreateEvent) event;
             e.getMessage().editMessageEmbeds(embedBuilder.build()).setActionRow(components).queue();
+            new Thread(() -> {
+                embedBuilder.setImage(item.build(member.getGuild().getId(), member.getId()));
+                e.getMessage().editMessageEmbeds(embedBuilder.build()).setActionRow(components).queue();
+            }).start();
             e.deferEdit().queue();
         } else throw new IllegalArgumentException("Event must be SlashCommandInteractionEvent or GenericComponentInteractionCreateEvent");
 
@@ -92,6 +102,10 @@ public class Page {
     public void open (MessageReceivedEvent event) {
         List<ItemComponent> e = actualOpen(event.getMember());
         event.getMessage().getReferencedMessage().editMessageEmbeds(embedBuilder.build()).setActionRow(e).queue();
+        new Thread(() -> {
+            embedBuilder.setImage(item.build(member.getGuild().getId(), member.getId()));
+            event.getMessage().getReferencedMessage().editMessageEmbeds(embedBuilder.build()).setActionRow(e).queue();
+        }).start();
         for (Interaction interaction : items) {
             if (interaction instanceof AfterOpen) {
                 ((AfterOpen) interaction).run(event.getMember());
@@ -105,7 +119,23 @@ public class Page {
         }
 
         this.item = Item.currentlyEditing.get(member.getId());
-        embedBuilder.setImage(item.build(member.getGuild().getId(), member.getId()));
+        List<String> lore = new ArrayList<>();
+        lore.add(item.name);
+        if (!item.stats.isEmpty() && !item.pureLore) {
+            for (Stat stat : item.stats.keySet()) {
+                lore.add("&7" + stat.displayName + ": " + stat.color + "+" + item.stats.get(stat) + stat.suffix);
+            }
+            lore.add("");
+        }
+        if (item.numberedLore) {
+            for (int i = 0; i < item.lore.size(); i++) {
+                lore.add("&c" + (i + 1) + ". &r" + item.lore.get(i));
+            }
+        }
+        lore.addAll(item.description);
+        lore.add(item.rarity);
+        Item item = Item.currentlyEditing.get(member.getId());
+        item.lore = lore;
         embedBuilder.addField("Lore", item.lore.size() <= 50 ? String.join("\n", item.lore) : String.join("\n", item.lore.subList(0, 50)), false);
 
         ArrayList<ItemComponent> components = new ArrayList<>();

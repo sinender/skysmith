@@ -37,11 +37,11 @@ public class Rarity extends Page {
                     return;
                 }
                 if (selectedOption.getLabel().equals("Custom")) {
-                    embedBuilder.setDescription("Please reply with the custom rarity of your item.");
+                    event.reply("Please reply to the message with your custom rarity.").setEphemeral(true).queue();
                     return;
                 }
                 event.getChannel().sendMessage("Rarity set to " + selectedOption.getLabel() + ".").queue(message -> {
-                    message.delete().queueAfter(5, TimeUnit.SECONDS);
+                    message.delete().queueAfter(3, TimeUnit.SECONDS);
                 });
                 Item.currentlyEditing.get(event.getMember().getId()).rarity = net.poke.skysmith.utils.Rarity.valueOf(selectedOption.getLabel()).color + net.poke.skysmith.utils.Rarity.valueOf(selectedOption.getLabel()).displayName;
                 new Rarity().open(event);
@@ -55,7 +55,10 @@ public class Rarity extends Page {
         set(new Message() {
             @Override
             public void run(MessageReceivedEvent e) {
-                e.getMessage().reply("Rarity set to " + e.getMessage().getContentRaw() + ".").queue();
+                e.getMessage().reply("Rarity set to " + e.getMessage().getContentRaw() + ".").queue(message -> {
+                    message.delete().queueAfter(3, TimeUnit.SECONDS);
+                    e.getMessage().delete().queueAfter(3, TimeUnit.SECONDS);
+                });
                 Item.currentlyEditing.get(e.getMember().getId()).rarity = e.getMessage().getContentRaw();
                 new Rarity().open(e);
             }

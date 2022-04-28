@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.poke.skysmith.command.CommandFramework;
 import net.poke.skysmith.command.CommandListener;
 import net.poke.skysmith.command.commands.CreateCMD;
+import net.poke.skysmith.command.commands.EditItemCMD;
 import net.poke.skysmith.command.pages.revamped.events.PageListener;
 import net.poke.skysmith.command.pages.revamped.pages.*;
 import net.poke.skysmith.command.pages.revamped.Page;
@@ -67,6 +68,7 @@ public class Main {
 
     private void initCommands() {
         CommandFramework.add(new CreateCMD());
+        CommandFramework.add(new EditItemCMD(null));
     }
 
     private void registerPages() {

@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.poke.skysmith.Main;
 
 import java.util.ArrayList;
@@ -17,6 +18,12 @@ public abstract class CommandFramework extends ListenerAdapter {
     public static ArrayList<CommandFramework> commands = new ArrayList<>();
 
     public CommandFramework(String name, String description, OptionData... options) {
+        this.name = name;
+        Main.jda.upsertCommand(name, description).addOptions(options).queue();
+        Main.jda.addEventListener(this);
+    }
+
+    public CommandFramework(String name, String description, List<OptionData> options) {
         this.name = name;
         Main.jda.upsertCommand(name, description).addOptions(options).queue();
         Main.jda.addEventListener(this);

@@ -10,6 +10,7 @@ import net.poke.skysmith.command.pages.revamped.interactions.Selection;
 import net.poke.skysmith.command.pages.revamped.pages.CreatePage;
 import net.poke.skysmith.command.pages.revamped.pages.settings.Name;
 import net.poke.skysmith.command.pages.revamped.pages.settings.Rarity;
+import net.poke.skysmith.utils.Item;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,18 @@ public class Settings extends Page {
                     break;
                     case "Rarity": {
                         new Rarity().open(event);
+                    }
+                    break;
+                    case "Pure Lore": {
+                        Item.currentlyEditing.get(event.getMember().getId()).pureLore = !Item.currentlyEditing.get(event.getMember().getId()).pureLore;
+                        event.reply("Pure lore is now " + (Item.currentlyEditing.get(event.getMember().getId()).pureLore ? "enabled" : "disabled") + "!").queue();
+                        new Settings().open(event);
+                    }
+                    break;
+                    case "Numbered Lore": {
+                        Item.currentlyEditing.get(event.getMember().getId()).numberedLore = !Item.currentlyEditing.get(event.getMember().getId()).numberedLore;
+                        event.reply("Numbered lore is now " + (Item.currentlyEditing.get(event.getMember().getId()).numberedLore ? "enabled" : "disabled") + "!").queue();
+                        new Settings().open(event);
                     }
                     break;
                     default: {

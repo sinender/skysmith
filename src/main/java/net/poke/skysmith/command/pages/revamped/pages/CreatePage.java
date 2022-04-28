@@ -9,6 +9,11 @@ import net.poke.skysmith.command.pages.revamped.pages.createpage.Finish;
 import net.poke.skysmith.command.pages.revamped.pages.createpage.Settings;
 import net.poke.skysmith.command.pages.revamped.pages.createpage.Stats;
 import net.poke.skysmith.utils.ButtonColor;
+import net.poke.skysmith.utils.Item;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class CreatePage extends Page {
     public CreatePage() {
@@ -117,6 +122,7 @@ public class CreatePage extends Page {
             @Override
             public void run(ButtonInteractionEvent e) {
                 //todo add the ability editor page
+                e.reply("This feature is not yet implemented!").queue();
             }
         });
         set(new Button() {
@@ -143,6 +149,15 @@ public class CreatePage extends Page {
             @Override
             public void run(ButtonInteractionEvent e) {
                 new Finish(e.getMember()).open(e);
+                if (Item.memberItems.containsKey(e.getMember().getId())) {
+                    ArrayList<Item> items = new ArrayList<>(Item.memberItems.get(e.getMember().getId()));
+                    items.add(Item.currentlyEditing.get(e.getMember().getId()));
+                    Item.memberItems.put(e.getMember().getId(), items);
+                } else {
+                    ArrayList<Item> items = new ArrayList<>();
+                    items.add(Item.currentlyEditing.get(e.getMember().getId()));
+                    Item.memberItems.put(e.getMember().getId(), items);
+                }
             }
         });
     }
