@@ -119,8 +119,10 @@ public class Page {
         }
 
         this.item = Item.currentlyEditing.get(member.getId());
-        List<String> lore = item.getLore();
-        embedBuilder.addField("Lore", lore.size() <= 50 ? String.join("\n", lore) : String.join("\n", lore.subList(0, 50)), false);
+        if (item != null) {
+            List<String> lore = item.getLore();
+            embedBuilder.addField("Lore", lore.size() <= 50 ? String.join("\n", lore) : String.join("\n", lore.subList(0, 50)), false);
+        }
 
         ArrayList<ItemComponent> components = new ArrayList<>();
         for (int i = 0; i < size; i++) {
