@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static net.poke.skysmith.Main.mongo;
+
 public class CreatePage extends Page {
     public CreatePage() {
         super("Skysmith Item Creator", 5);
@@ -122,7 +124,7 @@ public class CreatePage extends Page {
             @Override
             public void run(ButtonInteractionEvent e) {
                 //todo add the ability editor page
-                e.reply("This feature is not yet implemented!").queue();
+                e.reply("This feature is not yet implemented!").setEphemeral(true).queue();
             }
         });
         set(new Button() {
@@ -158,6 +160,7 @@ public class CreatePage extends Page {
                     items.add(Item.currentlyEditing.get(e.getMember().getId()));
                     Item.memberItems.put(e.getMember().getId(), items);
                 }
+                mongo.saveItem(Item.currentlyEditing.get(e.getMember().getId()), e.getMember().getId());
             }
         });
     }

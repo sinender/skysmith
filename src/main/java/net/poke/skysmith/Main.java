@@ -5,11 +5,14 @@ import com.uploadcare.api.Project;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.poke.skysmith.command.CommandFramework;
 import net.poke.skysmith.command.CommandListener;
 import net.poke.skysmith.command.commands.CreateCMD;
 import net.poke.skysmith.command.commands.EditItemCMD;
+import net.poke.skysmith.command.commands.LoadItemCMD;
 import net.poke.skysmith.command.pages.revamped.events.PageListener;
 import net.poke.skysmith.command.pages.revamped.pages.*;
 import net.poke.skysmith.command.pages.revamped.Page;
@@ -20,7 +23,11 @@ import net.poke.skysmith.command.pages.revamped.pages.createpage.Stats;
 import net.poke.skysmith.command.pages.revamped.pages.description.*;
 import net.poke.skysmith.command.pages.revamped.pages.settings.Name;
 import net.poke.skysmith.command.pages.revamped.pages.settings.Rarity;
+import net.poke.skysmith.mongo.MongoManager;
 import net.poke.skysmith.utils.Item;
+import net.poke.skysmith.utils.Stat;
+import org.bson.Document;
+import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
@@ -32,7 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class Main {
+public class Main extends ListenerAdapter {
     public static JDA jda = null;
     public static Font regularFont = null;
     public static Font boldFont = null;
@@ -41,6 +48,8 @@ public class Main {
     public static Project project = null;
     public static ArrayList<Page> PAGES = new ArrayList<Page>();
     public static Project.Collaborator owner = null;
+    public static MongoManager mongo;
+    public static List<Item> cachedItems = new ArrayList<>();
     public static void main(String[] args) throws LoginException, IOException, URISyntaxException, FontFormatException {
         new Main().create();
     }
@@ -57,18 +66,44 @@ public class Main {
         builder.disableCache(Arrays.asList(CacheFlag.values()));
         builder.enableCache(CacheFlag.EMOTE);
         builder.setActivity(Activity.watching("people make items."));
-        builder.addEventListeners(new CommandListener(), new PageListener());
+        builder.addEventListeners(new CommandListener(), new PageListener(), this);
         jda = builder.build();
-        initCommands();
         registerPages();
         client = new Client("c20c51a4c8f8ffaa9ef7", "9ceb71406b00148119c9");
         project = client.getProject();
         owner = project.getOwner();
     }
 
+    @Override
+    public void onReady(@NotNull ReadyEvent event) {
+        mongo = new MongoManager();
+        mongo.connect();
+        initCommands();
+        mongo.getAllDocuments().forEach(doc -> {
+            Item item = new Item(doc.getString("_id"), doc.getString("name"), doc.getList("description", String.class), doc.getString("rarity"));
+            item.pureLore = doc.getBoolean("pureLore");
+            item.numberedLore = doc.getBoolean("numberedLore");
+            Document stats = doc.get("stats", Document.class);
+            for (Stat stat : Stat.values()) {
+                if (stats.containsKey(stat.name())) {
+                    item.stats.put(stat, stats.getInteger(stat.name()));
+                }
+            }
+            cachedItems.add(item);
+            System.out.println("Loaded item: " + item.name + "\nWith lore: " + item.getLore());
+            String memberId = doc.getString("owner");
+            ArrayList<Item> items = Item.memberItems.get(memberId) == null ? new ArrayList<>() : Item.memberItems.get(memberId);
+            items.add(item);
+            Item.memberItems.put(memberId, items);
+        });
+        System.out.println("Ready!");
+    }
+
     private void initCommands() {
         CommandFramework.add(new CreateCMD());
         CommandFramework.add(new EditItemCMD(null));
+        CommandFramework.add(new LoadItemCMD());
+        jda.addEventListener(new LoadItemCMD());
     }
 
     private void registerPages() {

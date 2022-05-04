@@ -18,7 +18,7 @@ public class SelectItem extends Page {
             public List<SelectOption> options() {
                 ArrayList<SelectOption> options = new ArrayList<>();
                 Item.memberItems.get(member.getId()).forEach(item -> {
-                    options.add(SelectOption.of(item.name, item.id));
+                    options.add(SelectOption.of(item.name + "-" + item.id, item.id));
                 });
                 return options;
             }

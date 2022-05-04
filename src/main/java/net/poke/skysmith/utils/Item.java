@@ -47,6 +47,26 @@ public class Item {
         stats = new HashMap<>();
     }
 
+    public List<String> getLore () {
+        ArrayList<String> lore = new ArrayList<>();
+        Rarity enumRarity = Rarity.fromColoredString(rarity);
+        lore.add((enumRarity != null ? enumRarity.color : "") + name);
+        if (!stats.isEmpty() && !pureLore) {
+            for (Stat stat : stats.keySet()) {
+                lore.add("&7" + stat.displayName + ": " + stat.color + "+" + stats.get(stat) + stat.suffix);
+            }
+            lore.add("");
+        }
+        if (numberedLore) {
+            for (int i = 0; i < lore.size(); i++) {
+                lore.add("&c" + (i + 1) + ". &r" + lore.get(i));
+            }
+        }
+        lore.addAll(description);
+        lore.add(enumRarity == null ? rarity : enumRarity.toString());
+        return lore;
+    }
+
     public Item addLine(String line) {
         description.add(line);
         return this;
@@ -122,21 +142,7 @@ public class Item {
 
     public String build(String guild, String member) {
         long ms = System.currentTimeMillis();
-        lore = new ArrayList<>();
-        lore.add(name);
-        if (!stats.isEmpty() && !pureLore) {
-            for (Stat stat : stats.keySet()) {
-                lore.add("&7" + stat.displayName + ": " + stat.color + "+" + stats.get(stat) + stat.suffix);
-            }
-            lore.add("");
-        }
-        if (numberedLore) {
-            for (int i = 0; i < lore.size(); i++) {
-                lore.add("&c" + (i + 1) + ". &r" + lore.get(i));
-            }
-        }
-        lore.addAll(description);
-        lore.add(rarity);
+        lore = getLore();
         int width = 14 + width();
         int height = 10 + lore.size() * height(Main.regularFont);
         BufferedImage bufferedImage = new BufferedImage(width, height,
@@ -200,7 +206,6 @@ public class Item {
             format = 0;
         }
         if (!hasMagic()) {
-            System.out.println("Created image in " + (System.currentTimeMillis() - ms) + "ms");
             String url = null;
             try {
                 new File(guild).mkdir();
@@ -217,7 +222,6 @@ public class Item {
             } catch (IOException e) {
                 System.out.println("Upload failed :(");
             }
-            System.out.println("Got url of image in " + (System.currentTimeMillis() - ms) + "ms");
             return url;
         } else {
             return buildMagic(guild, member, ms);
@@ -301,7 +305,6 @@ public class Item {
         }
         GifSequenceWriter gif = null;
         String url = null;
-        System.out.println(images.size());
         try {
             File file = new File(guild + "/" + "Skysmith-" + member + ".gif");
             gif = new GifSequenceWriter(ImageIO.createImageOutputStream(file), BufferedImage.TYPE_INT_ARGB, 20, true);
@@ -317,7 +320,6 @@ public class Item {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Created gif in " + (System.currentTimeMillis() - ms) + "ms");
         return url;
     }
 

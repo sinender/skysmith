@@ -34,9 +34,19 @@ public enum Rarity {
         return rarities;
     }
 
+    public String toString() {
+        return this.color.toString() + this.displayName;
+    }
+
     public static Rarity fromString(String text) {
         return Arrays.stream(values())
                 .filter(v -> v.name().equalsIgnoreCase(text))
+                .findFirst()
+                .orElse(null);
+    }
+    public static Rarity fromColoredString(String text) {
+        return Arrays.stream(values())
+                .filter(v -> (v.color.toString() + v.name()).equalsIgnoreCase(text))
                 .findFirst()
                 .orElse(null);
     }
