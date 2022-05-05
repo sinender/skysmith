@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static net.poke.skysmith.Main.jda;
 import static net.poke.skysmith.Main.mongo;
 
 public class CreatePage extends Page {
@@ -161,6 +162,7 @@ public class CreatePage extends Page {
                     Item.memberItems.put(e.getMember().getId(), items);
                 }
                 mongo.saveItem(Item.currentlyEditing.get(e.getMember().getId()), e.getMember().getId());
+                jda.updateCommands().queue();
             }
         });
     }

@@ -34,11 +34,6 @@ public class LoadItemCMD extends CommandFramework {
     }
 
     @Override
-    public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
-        event.replyChoices(getChoices()).queue();
-    }
-
-    @Override
     public void run(Member member, Channel channel, List<OptionMapping> options, SlashCommandInteractionEvent event) {
         String id = options.get(0).getAsString();
         Document doc = Main.mongo.getDoc(id);

@@ -103,7 +103,6 @@ public class Main extends ListenerAdapter {
         CommandFramework.add(new CreateCMD());
         CommandFramework.add(new EditItemCMD(null));
         CommandFramework.add(new LoadItemCMD());
-        jda.addEventListener(new LoadItemCMD());
     }
 
     private void registerPages() {
@@ -119,5 +118,6 @@ public class Main extends ListenerAdapter {
         PAGES.add(new Settings());
         PAGES.add(new Rarity());
         PAGES.add(new Name());
+        PAGES.add(new SelectItem(null));
     }
 }

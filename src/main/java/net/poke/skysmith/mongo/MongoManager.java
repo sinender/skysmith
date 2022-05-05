@@ -77,7 +77,7 @@ public class MongoManager {
         if (collection.find(new Document("_id", item.id)).first() == null) {
             collection.insertOne(doc);
         } else {
-            collection.updateOne(Filters.eq("_id", item.id), Updates.set("$set", doc));
+            collection.updateOne(new Document("_id", item.id), doc);
         }
     }
 
